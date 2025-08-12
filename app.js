@@ -51,6 +51,107 @@ function loadAllScreens() {
     if (!container) return;
 
     container.innerHTML = `
+    <!-- Register Screen -->
+    <div class="screen" id="register" style="display:none">
+      <div class="topbar">
+        <button class="btn ghost" onclick="navigateTo('login')" style="padding:8px">←</button>
+        <div class="title">Crear cuenta</div>
+        <div class="status-dot"><span class="dot"></span> Online</div>
+      </div>
+
+      <div class="welcome" style="padding:20px 0">
+        <div class="logo" style="width:80px; height:80px; border-radius:20px; margin:0 auto 24px"></div>
+        <h2>Únete a LecheFácil</h2>
+        <p style="color:var(--muted); margin:0 0 32px">Crea tu cuenta para empezar</p>
+      </div>
+
+      <div class="card">
+        <h3>Información personal</h3>
+        <div class="field">
+          <label>Nombre</label>
+          <input class="input" placeholder="Tu nombre" id="registerFirstName" />
+        </div>
+        <div class="field">
+          <label>Apellido</label>
+          <input class="input" placeholder="Tu apellido" id="registerLastName" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input class="input" type="email" placeholder="tu@email.com" id="registerEmail" />
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <input class="input" type="password" placeholder="Mínimo 6 caracteres" id="registerPassword" />
+        </div>
+        <div class="field">
+          <label>Confirmar contraseña</label>
+          <input class="input" type="password" placeholder="Repite tu contraseña" id="registerConfirmPassword" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Información de la finca</h3>
+        <div class="field">
+          <label>Nombre de la finca</label>
+          <input class="input" placeholder="Ej: Finca Los Alamos" id="registerFarmName" />
+        </div>
+        <div class="field">
+          <label>Ubicación</label>
+          <input class="input" placeholder="Ciudad, País" id="registerFarmLocation" />
+        </div>
+        <div class="field">
+          <label>Número aproximado de vacas</label>
+          <div class="tabs" id="registerCowCountTabs">
+            <div class="tab is-active" onclick="selectRegisterCowCount('1-10')">1-10</div>
+            <div class="tab" onclick="selectRegisterCowCount('11-50')">11-50</div>
+            <div class="tab" onclick="selectRegisterCowCount('50+')">50+</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Preferencias iniciales</h3>
+        <div class="field">
+          <label>Unidad de peso preferida</label>
+          <div class="tabs" id="registerUnitTabs">
+            <div class="tab is-active" onclick="selectRegisterUnit('kg')">Kilogramos</div>
+            <div class="tab" onclick="selectRegisterUnit('lbs')">Libras</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Turno principal</label>
+          <div class="tabs" id="registerShiftTabs">
+            <div class="tab is-active" onclick="selectRegisterShift('morning')">Mañana</div>
+            <div class="tab" onclick="selectRegisterShift('afternoon')">Tarde</div>
+            <div class="tab" onclick="selectRegisterShift('evening')">Noche</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin:16px 0">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer">
+          <input type="checkbox" id="registerTerms" style="width:16px; height:16px">
+          <span style="font-size:12px; color:var(--muted)">
+            Acepto los <a href="#" style="color:var(--brand)">Términos de Servicio</a> y 
+            <a href="#" style="color:var(--brand)">Política de Privacidad</a>
+          </span>
+        </label>
+      </div>
+
+      <div class="footer">
+        <button class="btn secondary full" onclick="navigateTo('login')">Ya tengo cuenta</button>
+        <button class="btn full" onclick="handleRegister()">Crear cuenta</button>
+      </div>
+
+      <div style="text-align:center; margin-top:16px">
+        <p style="font-size:12px; color:var(--muted)">
+          Al registrarte, obtienes 30 días gratis de prueba<br>
+          Sin compromiso • Cancela cuando quieras
+        </p>
+      </div>
+    </div>
+
+
     <!-- Edit cow Screen -->
     <div class="screen" id="editCow" style="display:none">
     <div class="topbar">
@@ -1541,4 +1642,166 @@ function viewCowHistory(cowId) {
   
   const records = appData.milkRecords ? appData.milkRecords.filter(r => r.cowId === cowId) : [];
   alert(`Historial de ${cow.alias}:\n${records.length} registros encontrados\n\n(Pantalla de historial detallado próximamente)`);
+}
+
+
+// ===============================
+// Register - variables globales
+// ===============================
+let registerCowCount = '1-10';
+let registerUnit = 'kg';
+let registerShift = 'morning';
+
+// ===============================
+// Register - funciones
+// ===============================
+function selectRegisterCowCount(count) {
+  registerCowCount = count;
+  document.querySelectorAll('#registerCowCountTabs .tab').forEach(tab => {
+    tab.classList.remove('is-active');
+  });
+  event.target.classList.add('is-active');
+}
+
+function selectRegisterUnit(unit) {
+  registerUnit = unit;
+  document.querySelectorAll('#registerUnitTabs .tab').forEach(tab => {
+    tab.classList.remove('is-active');
+  });
+  event.target.classList.add('is-active');
+}
+
+function selectRegisterShift(shift) {
+  registerShift = shift;
+  document.querySelectorAll('#registerShiftTabs .tab').forEach(tab => {
+    tab.classList.remove('is-active');
+  });
+  event.target.classList.add('is-active');
+}
+
+function handleRegister() {
+  const firstName = document.getElementById('registerFirstName').value.trim();
+  const lastName = document.getElementById('registerLastName').value.trim();
+  const email = document.getElementById('registerEmail').value.trim();
+  const password = document.getElementById('registerPassword').value;
+  const confirmPassword = document.getElementById('registerConfirmPassword').value;
+  const farmName = document.getElementById('registerFarmName').value.trim();
+  const farmLocation = document.getElementById('registerFarmLocation').value.trim();
+  const termsAccepted = document.getElementById('registerTerms').checked;
+
+  // Validaciones
+  if (!firstName || !lastName) {
+    showError('Nombre y apellido son requeridos');
+    return;
+  }
+
+  if (!email) {
+    showError('El email es requerido');
+    return;
+  }
+
+  if (!validateEmail(email)) {
+    showError('Ingresa un email válido');
+    return;
+  }
+
+  if (!password || password.length < 6) {
+    showError('La contraseña debe tener al menos 6 caracteres');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    showError('Las contraseñas no coinciden');
+    return;
+  }
+
+  if (!farmName) {
+    showError('El nombre de la finca es requerido');
+    return;
+  }
+
+  if (!termsAccepted) {
+    showError('Debes aceptar los términos y condiciones');
+    return;
+  }
+
+  // Verificar si el email ya existe
+  if (appData.users && appData.users[email]) {
+    showError('Este email ya está registrado');
+    return;
+  }
+
+  // Crear nuevo usuario
+  const newUser = {
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    password: password, // En producción esto debe estar hasheado
+    role: 'admin', // El primer usuario siempre es admin
+    createdAt: new Date().toISOString()
+  };
+
+  // Crear tenant/finca
+  const newTenant = {
+    name: farmName,
+    location: farmLocation,
+    cowCount: registerCowCount,
+    defaultUnit: registerUnit,
+    defaultShift: registerShift,
+    owner: newUser,
+    createdAt: new Date().toISOString()
+  };
+
+  // Guardar en appData
+  if (!appData.users) appData.users = {};
+  appData.users[email] = newUser;
+  appData.tenant = newTenant;
+
+  // Configurar settings iniciales
+  settings.defaultUnit = registerUnit;
+  settings.defaultShift = registerShift;
+
+  // Auto-login del nuevo usuario
+  currentUser = newUser;
+
+  showSuccess('¡Cuenta creada exitosamente! Bienvenido a LecheFácil');
+  
+  setTimeout(() => {
+    navigateTo('dashboard');
+    // Actualizar UI para el nuevo usuario
+    updateUIAfterRegister(newUser, newTenant);
+  }, 1500);
+}
+
+function updateUIAfterRegister(user, tenant) {
+  // Actualizar dashboard
+  const greet = document.getElementById('userGreeting');
+  const urole = document.getElementById('userRole');
+  const rbadge = document.getElementById('roleBadge');
+  
+  if (greet) greet.textContent = `¡Hola ${user.firstName}!`;
+  if (urole) urole.textContent = `Administrador • ${tenant.name}`;
+  if (rbadge) rbadge.textContent = 'Admin';
+
+  // Mostrar secciones de admin
+  const adminSec = document.getElementById('adminSection');
+  const menuAdmin = document.getElementById('menuAdminSection');
+  
+  if (adminSec) adminSec.style.display = 'block';
+  if (menuAdmin) menuAdmin.style.display = 'block';
+
+  // Info en menú
+  const mName = document.getElementById('menuUserName');
+  const mEmail = document.getElementById('menuUserEmail');
+  const mRole = document.getElementById('menuUserRole');
+  
+  if (mName) mName.textContent = `${user.firstName} ${user.lastName}`;
+  if (mEmail) mEmail.textContent = user.email;
+  if (mRole) mRole.textContent = 'Administrador';
+}
+
+// Función helper para validar email
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 }
